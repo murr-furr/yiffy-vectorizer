@@ -58,6 +58,7 @@ function App() {
 
   const handleTrace = useCallback(() => {
     if (imageData) {
+      setOptimizedSvg(null); // Fix stale flash: Clear old optimized output when starting new trace
       traceImage(imageData, options);
     }
   }, [imageData, options, traceImage]);

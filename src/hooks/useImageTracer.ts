@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import * as Comlink from 'comlink';
 import type { TraceOptions, TraceResult } from '../worker/tracer.worker';
 
@@ -23,7 +23,7 @@ export const useImageTracer = () => {
   const [palette, setPalette] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const traceImage = async (imageData: ImageData, options: TraceOptions) => {
+  const traceImage = useCallback(async (imageData: ImageData, options: TraceOptions) => {
     setIsProcessing(true);
     setError(null);
     try {
@@ -44,7 +44,7 @@ export const useImageTracer = () => {
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, []);
 
   return { traceImage, isProcessing, svgOutput, palette, error };
 };
