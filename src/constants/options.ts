@@ -17,7 +17,8 @@ export const defaultOptions = {
   lcpr: 0,
   qcpr: 0,
   blurradius: 0,
-  blurdelta: 20
+  blurdelta: 20,
+  viewMode: 'fill' as 'fill' | 'outline'
 };
 
 export const PRESETS = {

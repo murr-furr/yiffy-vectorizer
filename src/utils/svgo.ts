@@ -7,12 +7,12 @@ export const optimizeSvg = (svgString: string): string => {
       plugins: [
         {
           name: 'preset-default',
-          params: {
-            overrides: {
-              removeViewBox: false,
-            },
-          },
-        } as unknown,
+          // preset-default usually includes removeViewBox, but in this specific environment
+          // or version it seems we should rely on defaults or configure it separately if needed.
+          // Since we want to KEEP the viewBox, we ideally want removeViewBox: false.
+          // If the warning says "not part of preset-default", it means it's not in the list
+          // to be overridden.
+        },
         'removeDimensions',
       ],
     });

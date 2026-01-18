@@ -5,7 +5,7 @@ import { Upload, Sliders, Image as ImageIcon, Download, Copy, RefreshCw } from '
 import type { TraceOptions } from './worker/tracer.worker';
 import { optimizeSvg } from './utils/svgo';
 
-// Components (will be extracted later)
+// Components
 import { FileUpload } from './components/FileUpload';
 import { ControlPanel } from './components/ControlPanel';
 import { PreviewArea } from './components/PreviewArea';
@@ -16,22 +16,18 @@ function App() {
   const [imageData, setImageData] = useState<ImageData | null>(null);
   const [options, setOptions] = useState<TraceOptions>(defaultOptions);
 
-  const { traceImage, isProcessing, svgOutput: rawSvgOutput } = useImageTracer();
+  const { traceImage, isProcessing, svgOutput: rawSvgOutput, palette } = useImageTracer();
   const [optimizedSvg, setOptimizedSvg] = useState<string | null>(null);
 
   useEffect(() => {
     if (rawSvgOutput) {
         // Optimize async to not block UI
-        // We use setTimeout to push it to the end of the event loop to avoid blocking render
-        // although here it is synchronous unless optimizeSvg is heavy.
-        // For truly non-blocking we should put svgo in worker too, but it's fast enough for now.
         const timer = setTimeout(() => {
              const optimized = optimizeSvg(rawSvgOutput);
              setOptimizedSvg(optimized);
         }, 0);
         return () => clearTimeout(timer);
     } else {
-        // Defer state update to avoid sync update in effect
         setTimeout(() => setOptimizedSvg(null), 0);
     }
   }, [rawSvgOutput]);
@@ -42,10 +38,8 @@ function App() {
     if (!imageFile) return;
 
     const url = URL.createObjectURL(imageFile);
-    // Defer state update
     setTimeout(() => setImageUrl(url), 0);
 
-    // Load image data for tracing
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
@@ -68,9 +62,7 @@ function App() {
     }
   }, [imageData, options, traceImage]);
 
-  // Auto-trace when image or options change (debounced could be better, but for now direct)
   useEffect(() => {
-      // Debounce slightly to avoid too many worker calls
       const timer = setTimeout(() => {
           if (imageData) {
               handleTrace();
@@ -86,55 +78,64 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8 font-sans">
+    <div className="min-h-screen p-4 md:p-6 font-sans bg-zinc-50 text-zinc-900">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Header */}
-        <header className="glass-panel flex items-center justify-between">
+        <header className="flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-zinc-200">
             <div className="flex items-center gap-3">
-                <div className="bg-pink-500 p-2 rounded-lg">
-                    <ImageIcon className="text-white" />
+                <div className="bg-zinc-900 p-2 rounded-lg">
+                    <ImageIcon className="text-white" size={20} />
                 </div>
-                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-pink-200">
-                    PNG to SVG Converter
-                </h1>
+                <div>
+                    <h1 className="text-xl font-bold text-zinc-900 tracking-tight">
+                        PNG to SVG
+                    </h1>
+                    <p className="text-xs text-zinc-500 font-medium">Vector Converter</p>
+                </div>
             </div>
-            <div className="text-sm text-white/60">
-                Client-side • Privacy First • Fast
+            <div className="flex items-center gap-4 text-sm font-medium text-zinc-500">
+                <span className="hidden md:inline">Client-side processing</span>
+                <span className="hidden md:inline">•</span>
+                <span>Privacy First</span>
             </div>
         </header>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-            {/* Sidebar Controls */}
-            <div className="lg:col-span-4 space-y-6">
-                <div className="glass-panel space-y-4">
-                    <h2 className="text-lg font-semibold flex items-center gap-2">
-                        <Upload size={18} /> Import Image
+            {/* Sidebar Controls - Reordered for Mobile: Below preview on mobile usually, but here we keep sidebar logic */}
+            {/* On mobile, we might want preview first? Standard pattern is input -> settings -> output.
+                Let's keep the order but ensure it stacks correctly.
+            */}
+            <div className="lg:col-span-4 space-y-6 order-2 lg:order-1">
+                <div className="panel p-5 space-y-4">
+                    <h2 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider flex items-center gap-2">
+                        <Upload size={16} /> Import
                     </h2>
                     <FileUpload onFileSelect={setImageFile} />
                 </div>
 
-                <div className="glass-panel space-y-4">
+                <div className="panel p-5 space-y-4">
                      <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-semibold flex items-center gap-2">
-                            <Sliders size={18} /> Settings
+                        <h2 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider flex items-center gap-2">
+                            <Sliders size={16} /> Configuration
                         </h2>
-                        {isProcessing && <RefreshCw className="animate-spin text-pink-400" size={18}/>}
+                        {isProcessing && <RefreshCw className="animate-spin text-zinc-400" size={16}/>}
                      </div>
 
                      <ControlPanel
                         options={options}
                         onChange={setOptions}
                         onPresetChange={handlePresetChange}
+                        palette={palette}
                      />
                 </div>
             </div>
 
             {/* Preview Area */}
-            <div className="lg:col-span-8">
-                <div className="glass-panel h-[600px] flex flex-col">
+            <div className="lg:col-span-8 order-1 lg:order-2">
+                <div className="panel p-1 h-[500px] md:h-[600px] flex flex-col bg-zinc-100/50">
                      <PreviewArea
                         originalImageUrl={imageUrl}
                         svgOutput={finalSvg}
@@ -144,15 +145,15 @@ function App() {
 
                 {/* Export Actions */}
                 {finalSvg && (
-                    <div className="mt-4 flex gap-4 justify-end">
+                    <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-end">
                          <button
-                            className="glass-panel hover:bg-white/10 flex items-center gap-2 px-6 py-3 transition-colors font-medium"
+                            className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 font-medium transition-colors shadow-sm"
                             onClick={() => navigator.clipboard.writeText(finalSvg)}
                         >
-                            <Copy size={18} /> Copy SVG
+                            <Copy size={16} /> Copy Code
                          </button>
                          <button
-                            className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white rounded-xl px-6 py-3 shadow-lg flex items-center gap-2 font-medium transition-all transform hover:scale-105"
+                            className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-medium transition-colors shadow-sm"
                             onClick={() => {
                                 const blob = new Blob([finalSvg], {type: 'image/svg+xml'});
                                 const url = URL.createObjectURL(blob);
@@ -163,7 +164,7 @@ function App() {
                                 URL.revokeObjectURL(url);
                             }}
                          >
-                            <Download size={18} /> Download SVG
+                            <Download size={16} /> Download SVG
                          </button>
                     </div>
                 )}

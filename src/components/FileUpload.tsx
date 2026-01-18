@@ -27,7 +27,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect }) => {
 
   return (
     <div
-      className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:bg-white/5 transition-colors cursor-pointer group relative"
+      className="border-2 border-dashed border-zinc-200 rounded-lg p-8 text-center hover:bg-zinc-50 hover:border-zinc-300 transition-all cursor-pointer group relative bg-zinc-50/50"
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
     >
@@ -37,14 +37,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect }) => {
         onChange={handleChange}
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
       />
-      <div className="flex flex-col items-center gap-3 text-white/60 group-hover:text-white transition-colors">
-        <div className="bg-white/10 p-3 rounded-full">
-          <UploadCloud size={24} />
+      <div className="flex flex-col items-center gap-3 text-zinc-500 group-hover:text-zinc-900 transition-colors">
+        <div className="bg-white p-3 rounded-full shadow-sm border border-zinc-100">
+          <UploadCloud size={24} className="text-zinc-400 group-hover:text-zinc-900 transition-colors" />
         </div>
-        <div className="text-sm">
-          <span className="font-semibold text-pink-300">Click to upload</span> or drag and drop
+        <div className="text-sm font-medium">
+          <span className="text-zinc-900">Click to upload</span> or drag and drop
         </div>
-        <div className="text-xs">PNG, JPG or WEBP (max 5MB)</div>
+        <div className="text-xs text-zinc-400">PNG, JPG or WEBP (max 5MB)</div>
       </div>
     </div>
   );

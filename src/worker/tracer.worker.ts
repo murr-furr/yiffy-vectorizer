@@ -22,17 +22,47 @@ export interface TraceOptions {
   qcpr?: number;
   blurradius?: number;
   blurdelta?: number;
+  viewMode?: 'fill' | 'outline';
+}
+
+export interface TraceResult {
+  svg: string;
+  palette: string[];
 }
 
 const tracer = {
-  trace(imageData: ImageData, options: TraceOptions): string {
+  trace(imageData: ImageData, options: TraceOptions): TraceResult {
     try {
-      // imagetracerjs expects an object with these properties
-      // Note: imagetracerjs might be mutating the options object or global state,
-      // so it's safer to run it in a worker.
+      // Cast to any because the type definition might be incomplete
+      const IT = ImageTracer as any;
 
-      const svgString = ImageTracer.imagedataToSVG(imageData, options);
-      return svgString;
+      // 1. Trace to data (intermediate representation)
+      const tracedata = IT.imagedataToTracedata(imageData, options);
+
+      // 2. Convert to SVG string
+      let svgString = IT.getsvgstring(tracedata, options);
+
+      // 3. Extract Palette
+      // tracedata.palette is array of {r, g, b, a}
+      const palette = tracedata.palette.map((c: {r: number, g: number, b: number, a: number}) =>
+        `rgb(${c.r},${c.g},${c.b})`
+      );
+
+      // 4. Handle Outline Mode
+      if (options.viewMode === 'outline') {
+        // Regex to find fill="rgb(...)" and change to fill="none" stroke="rgb(...)"
+        svgString = svgString.replace(
+            /fill="rgb\((\d+),(\d+),(\d+)\)"/g,
+            'fill="none" stroke="rgb($1,$2,$3)" stroke-width="2"'
+        );
+        // Also handle rgba if present
+        svgString = svgString.replace(
+            /fill="rgba\((\d+),(\d+),(\d+),(\d+)\)"/g,
+            'fill="none" stroke="rgba($1,$2,$3,$4)" stroke-width="2"'
+        );
+      }
+
+      return { svg: svgString, palette };
     } catch (error) {
       console.error("Tracing failed:", error);
       throw error;
