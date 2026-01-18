@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+body {
+  @apply bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 min-h-screen text-white;
+}
+
+/* Glassmorphism utilities */
+.glass {
+  @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-xl;
+}
+
+.glass-panel {
+  @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4;
+}
+
+.glass-input {
+  @apply bg-black/20 border-transparent focus:border-white/30 focus:bg-black/30 text-white placeholder-white/50 rounded-lg transition-all;
+}
+
+input[type="range"] {
+  @apply accent-pink-500 h-2 bg-white/20 rounded-lg appearance-none cursor-pointer;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-white/20 rounded-full hover:bg-white/30;
+}
