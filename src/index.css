@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+body {
+  @apply bg-zinc-50 min-h-screen text-zinc-900 antialiased;
+}
+
+/* Base styles for shadcn-like feel */
+.panel {
+  @apply bg-white border border-zinc-200 rounded-xl shadow-sm;
+}
+
+.input-field {
+  @apply bg-white border border-zinc-200 focus:border-zinc-400 focus:ring-2 focus:ring-zinc-100 text-zinc-900 placeholder-zinc-400 rounded-md transition-all outline-none;
+}
+
+/* Custom Range Slider */
+input[type="range"] {
+  @apply accent-zinc-900 h-1 bg-zinc-200 rounded-lg appearance-none cursor-pointer;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-zinc-300 rounded-full hover:bg-zinc-400;
+}
+
+/* SVG scaling in preview */
+.svg-preview-container > svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
